@@ -1,3 +1,6 @@
+import { NgDompurifySanitizer } from "@tinkoff/ng-dompurify";
+import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
+import { TuiRootModule, TuiDialogModule, TuiAlertModule, TUI_SANITIZER } from "@taiga-ui/core";
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
@@ -32,12 +35,17 @@ const oktaAuth = new OktaAuth(oktaConfig);
     BrowserModule,
     HttpClientModule,
     OktaAuthModule,
-    AppRoutingModule
-  ],
+    AppRoutingModule,
+      TuiRootModule,
+      BrowserAnimationsModule,
+      TuiDialogModule,
+      TuiAlertModule
+],
   providers: [
     { provide: OKTA_CONFIG, useValue: { oktaAuth } },
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
-  ],
+      {provide: TUI_SANITIZER, useClass: NgDompurifySanitizer}
+],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

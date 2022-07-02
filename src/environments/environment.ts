@@ -3,7 +3,14 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false
+  production: false,
+  apiUrl: 'http://localhost:8080/api/v1',
+  allowedOrigins: ['http://localhost:8080'],
+  oktaDomain: 'https://dev-20836463.okta.com',
+  clientId: '0oa5egky5mV9msdsm5d7',
+  issuer: 'https://dev-20836463.okta.com/oauth2/default',
+  tokenEndpoint: 'https://dev-20836463.okta.com/oauth2/default/v1/token',
+  authorizeEndpoint: 'https://dev-20836463.okta.com/oauth2/default/v1/authorize'
 };
 
 /*

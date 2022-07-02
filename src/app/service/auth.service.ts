@@ -27,6 +27,15 @@ export class AuthService {
     return this.oktaAuth.getAccessToken()!;
   }
 
+  get isAuthenticated$(): Observable<boolean> {
+    return new Observable(observer => {
+      this.oktaAuth.isAuthenticated()
+        .then(val => observer.next(val))
+        .catch(err => observer.error(err))
+        .finally(() => observer.complete());
+    });
+  }
+
   public signOut() {
     this.oktaAuth.signOut();
   }

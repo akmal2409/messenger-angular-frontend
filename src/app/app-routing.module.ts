@@ -1,15 +1,21 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { OktaAuthGuard, OktaCallbackComponent } from '@okta/okta-angular';
-import { HomeComponent } from './home/home.component';
+import { OktaCallbackComponent } from '@okta/okta-angular';
+import { MessengerHomeComponent } from './messenger-home/messenger-home.component';
 import { ErrorComponent } from './shared/error/error.component';
+import { RedirectAuthenticatedUsersGuard } from './shared/guard/redirect-authenticated-users.guard';
+import { WelcomeComponent } from './welcome/welcome.component';
 
 const routes: Routes = [
-  { path: '', redirectTo: '/home', pathMatch: 'full' },
   {
-    path: 'home',
-    component: HomeComponent,
-    // canActivate: [OktaAuthGuard]
+    path: '', component: WelcomeComponent, pathMatch: 'full',
+    data: { redirectUrl: '/home' },
+    canActivate: [RedirectAuthenticatedUsersGuard]
+  },
+  {
+    path: 'home', component: MessengerHomeComponent, children: [
+
+    ]
   },
   {
     path: 'login/callback',

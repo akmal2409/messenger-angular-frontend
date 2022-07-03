@@ -2,19 +2,23 @@ import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Inject, Injectable, Injector } from "@angular/core";
 import { OKTA_AUTH } from "@okta/okta-angular";
 import { getOAuthUrls, OAuthResponse, OktaAuth, Tokens } from "@okta/okta-auth-js";
-import { map, Observable, throwError } from "rxjs";
+import { defaultIfEmpty, from, map, mergeMap, Observable, of, shareReplay, switchMap, take, throwError } from "rxjs";
 import { environment } from "src/environments/environment";
 import { ClientError } from "../model/shared/client-error.model";
-import { AUTHENTICATION_REFRESH_TOKEN_EXPIRED } from "../model/shared/error.codes";
+import { AUTHENTICATION_ERROR_NOT_AUTHENTICATED, AUTHENTICATION_REFRESH_TOKEN_EXPIRED } from "../model/shared/error.codes";
+import { User } from "../model/user/user.model";
+import { UserService } from "./user.service";
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
+  private _user$: Observable<User> | null = null;
 
   constructor(
     private readonly http: HttpClient,
-    private readonly injector: Injector
+    private readonly injector: Injector,
+    private readonly userService: UserService
   ) {
 
   }
@@ -25,6 +29,36 @@ export class AuthService {
 
   get accessToken() {
     return this.oktaAuth.getAccessToken()!;
+  }
+
+  get user$(): Observable<User> {
+    if (!this._user$) {
+      this._user$ = this.isAuthenticated$
+        .pipe(defaultIfEmpty(false),
+          take(1),
+          switchMap(isAuthenticated => {
+            if (!isAuthenticated) {
+              return throwError(() => new ClientError('Authentication Failure',
+                'User is not authenticated when trying to get current user in auth service',
+                undefined, AUTHENTICATION_ERROR_NOT_AUTHENTICATED))
+            }
+
+            return from(this.oktaAuth.tokenManager.getTokens())
+              .pipe(map(tokens => tokens.idToken?.claims?.sub));
+          }),
+          switchMap((userId) => {
+            if (!userId) {
+              return throwError(() => new ClientError('Auhentication Failure',
+                'User ID (sub) from an ID token claims property was null',
+                undefined, AUTHENTICATION_ERROR_NOT_AUTHENTICATED));
+            }
+
+            return this.userService.getUserByUid(userId);
+          }),
+          shareReplay(1));
+    }
+
+    return this._user$;
   }
 
   get isAuthenticated$(): Observable<boolean> {

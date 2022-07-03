@@ -1,1 +1,32 @@
-<p>messenger-home works!</p>
+<div class="tui-container tui-container_fullwidth messenger-layout-grid">
+  <aside class="side-content">
+    <header class="thread-list-header">
+      <h1 class="thread-list-heading">
+        Chats
+      </h1>
+
+      <div class="thread-list-actions">
+        <button tuiIconButton
+                type="button"
+                shape="rounded"
+                appearance="outline"
+                class="thread-list-action-btn"
+                size="s"
+                icon="tuiIconEdit">
+        </button>
+      </div>
+    </header>
+    <tui-scrollbar class="thread-scrollbar">
+      <app-thread-vertical-list [currenUserId]="user.uid"
+                                [threads]="latestThreads"
+                                *ngIf="!loading"></app-thread-vertical-list>
+    </tui-scrollbar>
+
+    <section class="user-profile"
+             id="user-profile">
+      {{ user.firstName }} {{ user.lastName }}
+    </section>
+  </aside>
+
+  <main class="main-content"></main>
+</div>

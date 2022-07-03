@@ -1,11 +1,16 @@
 import { NgModule } from "@angular/core";
-import { TuiAlertModule, TuiButtonModule, TuiDialogModule, TuiRootModule } from "@taiga-ui/core";
+import { TuiAlertModule, TuiButtonModule, TuiDialogModule, TuiHintModule, TuiRootModule, TuiScrollbarModule } from "@taiga-ui/core";
+import { TuiBadgedContentModule, TuiBadgeModule } from "@taiga-ui/kit";
 
 const MODULES = [
   TuiDialogModule,
   TuiAlertModule,
   TuiRootModule,
-  TuiButtonModule
+  TuiButtonModule,
+  TuiBadgeModule,
+  TuiScrollbarModule,
+  TuiBadgedContentModule,
+  TuiHintModule
 ];
 
 @NgModule({

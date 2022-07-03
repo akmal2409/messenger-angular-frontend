@@ -1,0 +1,54 @@
+.messenger-layout-grid {
+  display: grid;
+  grid-template-columns: 400px 1fr;
+
+  overflow: hidden;
+  grid-template-areas: "side-content main-content";
+  height: 100%;
+}
+
+.side-content {
+  // overflow: hidden;
+  grid-area: side-content;
+  height: 100%;
+  overflow: hidden;
+}
+
+.main-content {
+  overflow: hidden;
+  grid-area: main-content;
+  height: 100%;
+}
+
+.thread-list-header {
+  padding: 20px 5px 5px 5px;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+
+
+  .thread-list-heading {
+    flex: 1 0.5 150px;
+    margin: 0;
+  }
+
+  .thread-list-actions {
+    flex: 1 0 200px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+
+    .thread-list-action-btn {
+      background-color: rgba($color: #ccc, $alpha: 0.3);
+    }
+  }
+}
+
+.user-profile {
+  height: 50px;
+}
+
+.thread-scrollbar {
+  max-width: 99%;
+  height: calc(100% - 107px);
+}

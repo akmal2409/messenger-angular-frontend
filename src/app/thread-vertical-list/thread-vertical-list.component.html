@@ -1,0 +1,14 @@
+<ul class="thread-list-content">
+  <li *ngFor="let thread of threads"
+      app-thread-item
+      [name]="thread.threadName"
+      [thumbnailUrl]="thread.threadPictureThumbnailUrl"
+      [lastMessageAt]="thread.lastMessageAt"
+      [lastMessage]="thread.lastMessage"
+      [read]="thread.read"
+      [systemMessage]="thread.systemMessage"
+      [currentUserId]="currenUserId"
+      [authorId]="thread?.author?.uid || '' "
+      [authorName]="thread?.author?.name || ''">
+  </li>
+</ul>

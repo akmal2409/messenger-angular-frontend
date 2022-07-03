@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { OktaCallbackComponent } from '@okta/okta-angular';
+import { OktaAuthGuard, OktaCallbackComponent } from '@okta/okta-angular';
 import { MessengerHomeComponent } from './messenger-home/messenger-home.component';
 import { ErrorComponent } from './shared/error/error.component';
 import { RedirectAuthenticatedUsersGuard } from './shared/guard/redirect-authenticated-users.guard';
@@ -13,7 +13,8 @@ const routes: Routes = [
     canActivate: [RedirectAuthenticatedUsersGuard]
   },
   {
-    path: 'home', component: MessengerHomeComponent, children: [
+    path: 'home', component: MessengerHomeComponent, canActivate: [OktaAuthGuard],
+    canActivateChild: [OktaAuthGuard], children: [
 
     ]
   },

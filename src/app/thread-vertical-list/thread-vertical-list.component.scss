@@ -1,0 +1,15 @@
+.thread-list-content {
+  height: 100%;
+  width: 100%;
+  // overflow-y: auto;
+
+  list-style: none;
+  padding: 0;
+  padding-top: 10px;
+  margin: 0;
+
+  li {
+    height: 70px;
+    padding-right: 15px;
+  }
+}

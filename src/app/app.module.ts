@@ -17,6 +17,8 @@ import { MessengerHomeComponent } from './messenger-home/messenger-home.componen
 import { TuiModule } from './tui.module';
 import { ThreadVerticalListComponent } from './thread-vertical-list/thread-vertical-list.component';
 import { ThreadItemComponent } from './thread-vertical-list/thread-item/thread-item.component';
+import { UserThumbnailComponent } from './ui/user-thumbnail/user-thumbnail.component';
+import { ThreadComponent } from './thread/thread.component';
 
 const oktaConfig: OktaAuthOptions = {
   issuer: environment.issuer,
@@ -33,7 +35,10 @@ const oktaAuth = new OktaAuth(oktaConfig);
     WelcomeComponent,
     MessengerHomeComponent,
     ThreadVerticalListComponent,
-    ThreadItemComponent
+    ThreadItemComponent,
+    UserThumbnailComponent,
+
+    ThreadComponent
   ],
   imports: [
     BrowserModule,

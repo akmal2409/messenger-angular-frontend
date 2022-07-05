@@ -10,7 +10,8 @@ const MODULES = [
   TuiBadgeModule,
   TuiScrollbarModule,
   TuiBadgedContentModule,
-  TuiHintModule
+  TuiHintModule,
+  TuiAlertModule
 ];
 
 @NgModule({

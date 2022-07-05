@@ -4,6 +4,7 @@ import { OktaAuthGuard, OktaCallbackComponent } from '@okta/okta-angular';
 import { MessengerHomeComponent } from './messenger-home/messenger-home.component';
 import { ErrorComponent } from './shared/error/error.component';
 import { RedirectAuthenticatedUsersGuard } from './shared/guard/redirect-authenticated-users.guard';
+import { ThreadComponent } from './thread/thread.component';
 import { WelcomeComponent } from './welcome/welcome.component';
 
 const routes: Routes = [
@@ -15,7 +16,7 @@ const routes: Routes = [
   {
     path: 'home', component: MessengerHomeComponent, canActivate: [OktaAuthGuard],
     canActivateChild: [OktaAuthGuard], children: [
-
+      { path: 'thread/:threadId', component: ThreadComponent }
     ]
   },
   {

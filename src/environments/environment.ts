@@ -10,7 +10,8 @@ export const environment = {
   clientId: '0oa5egky5mV9msdsm5d7',
   issuer: 'https://dev-20836463.okta.com/oauth2/default',
   tokenEndpoint: 'https://dev-20836463.okta.com/oauth2/default/v1/token',
-  authorizeEndpoint: 'https://dev-20836463.okta.com/oauth2/default/v1/authorize'
+  authorizeEndpoint: 'https://dev-20836463.okta.com/oauth2/default/v1/authorize',
+  wsEndpoint: 'ws://localhost:8080/ws'
 };
 
 /*

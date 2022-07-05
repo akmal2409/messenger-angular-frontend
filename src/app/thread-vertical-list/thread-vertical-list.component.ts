@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { LatestThread } from '../model/thread/latest-thread.model';
 
 @Component({
@@ -7,6 +7,8 @@ import { LatestThread } from '../model/thread/latest-thread.model';
   styleUrls: ['./thread-vertical-list.component.scss']
 })
 export class ThreadVerticalListComponent implements OnInit {
+  @Output() onClick = new EventEmitter<LatestThread>();
+
   @Input() threads: Array<LatestThread> = [];
   @Input() currenUserId!: string;
 

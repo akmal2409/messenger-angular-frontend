@@ -19,14 +19,32 @@
     <tui-scrollbar class="thread-scrollbar">
       <app-thread-vertical-list [currenUserId]="user.uid"
                                 [threads]="latestThreads"
+                                (onClick)="onSelectThread($event)"
                                 *ngIf="!loading"></app-thread-vertical-list>
     </tui-scrollbar>
 
     <section class="user-profile"
              id="user-profile">
-      {{ user.firstName }} {{ user.lastName }}
+      <div class="user-profile-left">
+        <div class="thumbnail-wrapper">
+          <app-user-thumbnail [src]="user?.profileThumbnailUrl"></app-user-thumbnail>
+        </div>
+        <p>{{ user?.firstName }}</p>
+      </div>
+
+      <div class="user-profile-right">
+        <button tuiIconButton
+                type="button"
+                size="m"
+                shape="rounded"
+                appearance="whiteblock"
+                icon="tuiIconLogoutLarge"
+                (click)="onLogout()"></button>
+      </div>
     </section>
   </aside>
 
-  <main class="main-content"></main>
+  <main class="main-content">
+    <router-outlet></router-outlet>
+  </main>
 </div>

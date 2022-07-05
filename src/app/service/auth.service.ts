@@ -1,9 +1,12 @@
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Inject, Injectable, Injector } from "@angular/core";
+import { Router } from "@angular/router";
 import { OKTA_AUTH } from "@okta/okta-angular";
 import { getOAuthUrls, OAuthResponse, OktaAuth, Tokens } from "@okta/okta-auth-js";
+import { RxStompConfig } from "@stomp/rx-stomp";
 import { defaultIfEmpty, from, map, mergeMap, Observable, of, shareReplay, switchMap, take, throwError } from "rxjs";
 import { environment } from "src/environments/environment";
+import { rxStompConfig } from "../config/rx-stomp.config";
 import { ClientError } from "../model/shared/client-error.model";
 import { AUTHENTICATION_ERROR_NOT_AUTHENTICATED, AUTHENTICATION_REFRESH_TOKEN_EXPIRED } from "../model/shared/error.codes";
 import { User } from "../model/user/user.model";
@@ -18,7 +21,8 @@ export class AuthService {
   constructor(
     private readonly http: HttpClient,
     private readonly injector: Injector,
-    private readonly userService: UserService
+    private readonly userService: UserService,
+    private readonly router: Router
   ) {
 
   }
@@ -70,8 +74,10 @@ export class AuthService {
     });
   }
 
-  public signOut() {
-    this.oktaAuth.signOut();
+
+  public async signOut() {
+    await this.oktaAuth.signOut();
+    this.router.navigate(['/']);
   }
 
   public singInWithRedirect() {

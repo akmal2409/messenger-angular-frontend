@@ -9,7 +9,7 @@ import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core
           [colorBottom]="statusColour"
           size="m"
           [rounded]="true">
-        <img [src]="thumbnailUrl">
+          <app-user-thumbnail [src]="thumbnailUrl"></app-user-thumbnail>
       </tui-badged-content>
     <!-- </div> -->
 
@@ -130,7 +130,6 @@ export class ThreadItemComponent implements OnInit {
   constructor() { }
 
   ngOnInit(): void {
-    this.read = this.show();
     this.online = this.show();
   }
 

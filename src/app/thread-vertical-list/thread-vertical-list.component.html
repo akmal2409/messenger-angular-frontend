@@ -1,6 +1,7 @@
 <ul class="thread-list-content">
   <li *ngFor="let thread of threads"
       app-thread-item
+      (click)="onClick.emit(thread)"
       [name]="thread.threadName"
       [thumbnailUrl]="thread.threadPictureThumbnailUrl"
       [lastMessageAt]="thread.lastMessageAt"

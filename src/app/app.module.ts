@@ -19,6 +19,9 @@ import { ThreadVerticalListComponent } from './thread-vertical-list/thread-verti
 import { ThreadItemComponent } from './thread-vertical-list/thread-item/thread-item.component';
 import { UserThumbnailComponent } from './ui/user-thumbnail/user-thumbnail.component';
 import { ThreadComponent } from './thread/thread.component';
+import { MessageListComponent } from './message-list/message-list.component';
+import { MessageComponent } from './message-list/message/message.component';
+import { MessageInputComponent } from './message-input/message-input.component';
 
 const oktaConfig: OktaAuthOptions = {
   issuer: environment.issuer,
@@ -38,7 +41,10 @@ const oktaAuth = new OktaAuth(oktaConfig);
     ThreadItemComponent,
     UserThumbnailComponent,
 
-    ThreadComponent
+    ThreadComponent,
+     MessageListComponent,
+     MessageComponent,
+     MessageInputComponent
   ],
   imports: [
     BrowserModule,

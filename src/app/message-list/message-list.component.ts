@@ -1,3 +1,4 @@
+import { formatDate } from '@angular/common';
 import { Component, Input, OnInit } from '@angular/core';
 import { Message } from '../model/message/message.model';
 import { UserDetails } from '../model/user/user-details.model';
@@ -6,22 +7,29 @@ import { UserDetails } from '../model/user/user-details.model';
   selector: 'app-message-list',
   template: `
     <ul class="message-list-container">
-      <li
-        *ngFor="let message of messages"
-        [ngClass]="currentUserId !== message.authorId ? 'alternate' : 'default'"
-      >
-        <app-message
-          [message]="message.body"
-          [authorName]="memberMap.get(message.authorId)?.name"
-          [authorThumbnailUrl]="
-            memberMap.get(message.authorId)?.profileThumbnailImageUrl
+      <ng-container *ngFor="let message of messages; let i = index">
+        <div class="message-date-separator" *ngIf="showTimestamp(i)">
+          <small>{{ getFormattedTimestamp(message.timestamp) }}</small>
+        </div>
+        <li
+          [ngClass]="
+            currentUserId !== message.authorId ? 'alternate' : 'default'
           "
-          [timestamp]="message.timestamp"
-          [isInverted]="currentUserId !== message.authorId"
-          [isRead]="message.read"
-          [id]="'messsage-' + message.messageId"
-        ></app-message>
-      </li>
+        >
+          <app-message
+            [message]="message.body"
+            [authorName]="memberMap.get(message.authorId)?.name"
+            [authorThumbnailUrl]="
+              memberMap.get(message.authorId)?.profileThumbnailImageUrl
+            "
+            [timestamp]="message.timestamp"
+            [isInverted]="currentUserId !== message.authorId"
+            [isRead]="message.read"
+            [id]="'messsage-' + message.messageId"
+          ></app-message>
+        </li>
+        <!-- {{ getFormattedTimestamp(message.timestamp) }} -->
+      </ng-container>
     </ul>
   `,
   styleUrls: ['./message-list.component.scss'],
@@ -30,9 +38,31 @@ export class MessageListComponent implements OnInit {
   @Input() messages: Array<Message> = [];
   @Input() loading: boolean = false;
   @Input() memberMap = new Map<string, UserDetails>();
-  @Input() currentUserId: string | undefined;
+  @Input() currentUserId?: string;
+  @Input() hasMore?: boolean;
 
   constructor() {}
 
   ngOnInit(): void {}
+
+  public getFormattedTimestamp(date: Date): string {
+    return formatDate(date, 'mediumDate', 'en-GB');
+  }
+
+  public showTimestamp(index: number) {
+    if (!this.hasMore && index === 0) {
+      return true;
+    } else if (index > 0) {
+      const previousMessageTime = new Date(this.messages[index - 1].timestamp);
+      const currentMessageTime = new Date(this.messages[index].timestamp);
+
+      return (
+        currentMessageTime.getDay() > previousMessageTime.getDay() ||
+        currentMessageTime.getMonth() > previousMessageTime.getMonth() ||
+        currentMessageTime.getFullYear() > previousMessageTime.getFullYear()
+      );
+    }
+
+    return false;
+  }
 }

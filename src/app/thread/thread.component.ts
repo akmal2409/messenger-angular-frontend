@@ -1,13 +1,24 @@
+import { formatDate } from '@angular/common';
 import {
   AfterViewInit,
   Component,
   ElementRef,
+  OnDestroy,
   OnInit,
   ViewChild,
 } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { IMessage } from '@stomp/stompjs';
-import { debounceTime, forkJoin, fromEvent, map, switchMap, take } from 'rxjs';
+import {
+  debounceTime,
+  forkJoin,
+  fromEvent,
+  map,
+  Subject,
+  switchMap,
+  take,
+  takeUntil,
+} from 'rxjs';
 import { Message } from '../model/message/message.model';
 import { Thread } from '../model/thread/thread.model';
 import { UserDetails } from '../model/user/user-details.model';
@@ -27,6 +38,7 @@ import { ThreadEventType, ThreadService } from '../service/thread.service';
     <div class="message-list-container">
       <div class="message-list-scrollbar" #scrollRef>
         <app-message-list
+          [hasMore]="hasMore"
           [loading]="loading"
           [messages]="messages"
           [memberMap]="memberMap"
@@ -40,9 +52,9 @@ import { ThreadEventType, ThreadService } from '../service/thread.service';
   `,
   styleUrls: ['./thread.component.scss'],
 })
-export class ThreadComponent implements OnInit, AfterViewInit {
+export class ThreadComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('scrollRef', { read: ElementRef })
-  scrollContainer?: ElementRef<HTMLElement>;
+  private scrollContainer?: ElementRef<HTMLElement>;
 
   constructor(
     private readonly messageService: MessageService,
@@ -56,6 +68,8 @@ export class ThreadComponent implements OnInit, AfterViewInit {
   currentUser!: User;
   loading = true;
   memberMap = new Map<string, UserDetails>();
+
+  private readonly _destroy$ = new Subject<undefined>();
 
   private _pagingState: string | undefined;
   private _threadId!: string;
@@ -118,10 +132,34 @@ export class ThreadComponent implements OnInit, AfterViewInit {
     this.setUpLazyLoadingScrollListener();
   }
 
+  /**
+   * Returns true if there are any messages in the thread and
+   * we have reached the last page of the content.
+   */
+  get hasMore(): boolean {
+    return this.messages.length > 0 && this._pagingState != null;
+  }
+
+  /**
+   * On every scroll within the message list with a debounceTime of 100ms
+   * we check whether we have scrolled all the way up and need to load more content.
+   * scrollTop due to inverse scrolling is negative and hence we must take a positive value
+   * of it.
+   * The calculation reasonings are following:
+   * The scrollHeight according to MDN represents the total space taken by the content
+   * irrespective of the overflow (if we were to plade it all on a screen, that would have been
+   * the total scrollHeight). Furthermore, scrollTop tells us how far we have scrolled in,
+   * due to inverse scrolling this number actually represents the distance between the bottom
+   * of the container and the top. Hence, when we scroll completely up we will have
+   * maximum possible scrollTop position which does not include the container height. Therefore,
+   * in order to verify that we have scrolled up all the way, we have to also add
+   * offsetHeight (which takes into account height and padding). Since some of these numbers
+   * can be floating, we have to round up to the nearest integer.
+   */
   private setUpLazyLoadingScrollListener() {
     if (this.scrollContainer?.nativeElement) {
       fromEvent(this.scrollContainer.nativeElement, 'scroll')
-        .pipe(debounceTime(100))
+        .pipe(takeUntil(this._destroy$), debounceTime(100))
         .subscribe(() => {
           if (
             this.scrollContainer &&
@@ -142,6 +180,9 @@ export class ThreadComponent implements OnInit, AfterViewInit {
     }
   }
 
+  /**
+   * Depending on the paging state, fetches the next batch of messages.
+   */
   private fetchNextPage() {
     this.loading = true;
 
@@ -161,7 +202,7 @@ export class ThreadComponent implements OnInit, AfterViewInit {
       .subscribe(
         (messages) => {
           this._pagingState = messages.pagingState;
-          this.messages = [...messages.content, ...this.messages];
+          this.messages.unshift(...messages.content);
         },
         () => (this.loading = false),
         () => (this.loading = false)
@@ -171,6 +212,7 @@ export class ThreadComponent implements OnInit, AfterViewInit {
   private setupMessageListener() {
     this.rxStompService
       .watch(`/user/queue/threads/${this._threadId}`)
+      .pipe(takeUntil(this._destroy$))
       .subscribe((message) => {
         this.handleMessageEvent(message);
       });
@@ -193,5 +235,10 @@ export class ThreadComponent implements OnInit, AfterViewInit {
     for (const member of this.thread.members) {
       this.memberMap.set(member.uid, member);
     }
+  }
+
+  ngOnDestroy() {
+    this._destroy$.next(undefined);
+    this._destroy$.complete();
   }
 }

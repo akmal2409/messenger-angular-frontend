@@ -1,0 +1,25 @@
+:host {
+  display: flex;
+  max-width: 70%;
+  border-radius: 10px;
+  padding: 8px 8px;
+}
+
+:host(.message-host-default) {
+  background-color: var(--primary-blue);
+  color: #fff;
+  justify-content: flex-end;
+}
+
+:host(.message-host-alternate) {
+  background-color: #e4e6eb;
+  color: #000;
+  justify-content: flex-start;
+}
+
+.message-content {
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 0.84rem;
+  font-weight: 400;
+}

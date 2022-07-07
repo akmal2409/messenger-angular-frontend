@@ -9,6 +9,7 @@ export class MessageEvent {
     public body: string,
     public read: boolean,
     public edited: boolean,
-    public systemMessage: boolean
-  ) { }
+    public systemMessage: boolean,
+    public timestamp: Date
+  ) {}
 }

@@ -1,7 +1,13 @@
-import { Component, OnInit } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { IMessage } from '@stomp/stompjs';
-import { forkJoin, map, switchMap, take } from 'rxjs';
+import { debounceTime, forkJoin, fromEvent, map, switchMap, take } from 'rxjs';
 import { Message } from '../model/message/message.model';
 import { Thread } from '../model/thread/thread.model';
 import { UserDetails } from '../model/user/user-details.model';
@@ -15,16 +21,18 @@ import { ThreadEventType, ThreadService } from '../service/thread.service';
 @Component({
   selector: 'app-thread',
   template: `
-    <div class="thread-header-container"></div>
+    <div class="thread-header-container">
+      <tui-loader [showLoader]="loading"></tui-loader>
+    </div>
     <div class="message-list-container">
-      <tui-scrollbar class="message-list-scrollbar">
+      <div class="message-list-scrollbar" #scrollRef>
         <app-message-list
           [loading]="loading"
           [messages]="messages"
           [memberMap]="memberMap"
           [currentUserId]="currentUser?.uid"
         ></app-message-list>
-      </tui-scrollbar>
+      </div>
     </div>
     <div class="message-input-container">
       <app-message-input></app-message-input>
@@ -32,7 +40,10 @@ import { ThreadEventType, ThreadService } from '../service/thread.service';
   `,
   styleUrls: ['./thread.component.scss'],
 })
-export class ThreadComponent implements OnInit {
+export class ThreadComponent implements OnInit, AfterViewInit {
+  @ViewChild('scrollRef', { read: ElementRef })
+  scrollContainer?: ElementRef<HTMLElement>;
+
   constructor(
     private readonly messageService: MessageService,
     private readonly authService: AuthService,
@@ -97,8 +108,64 @@ export class ThreadComponent implements OnInit {
               payload: lastMessageReadStatus,
             });
           }
+
+          this.loading = false;
         },
       });
+  }
+
+  ngAfterViewInit(): void {
+    this.setUpLazyLoadingScrollListener();
+  }
+
+  private setUpLazyLoadingScrollListener() {
+    if (this.scrollContainer?.nativeElement) {
+      fromEvent(this.scrollContainer.nativeElement, 'scroll')
+        .pipe(debounceTime(100))
+        .subscribe(() => {
+          if (
+            this.scrollContainer &&
+            Math.ceil(
+              Math.abs(this.scrollContainer?.nativeElement.scrollTop) +
+                this.scrollContainer?.nativeElement.offsetHeight
+            ) >= this.scrollContainer.nativeElement.scrollHeight
+          ) {
+            if (
+              this._pagingState &&
+              this._pagingState.trim().length > 0 &&
+              !this.loading
+            ) {
+              this.fetchNextPage();
+            }
+          }
+        });
+    }
+  }
+
+  private fetchNextPage() {
+    this.loading = true;
+
+    this.messageService
+      .getMessagesByUserByThread(
+        this.currentUser.uid,
+        this._threadId,
+        this.messages[0].bucket + '',
+        this._pagingState
+      )
+      .pipe(
+        map((messages) => {
+          messages.content.reverse();
+          return messages;
+        })
+      )
+      .subscribe(
+        (messages) => {
+          this._pagingState = messages.pagingState;
+          this.messages = [...messages.content, ...this.messages];
+        },
+        () => (this.loading = false),
+        () => (this.loading = false)
+      );
   }
 
   private setupMessageListener() {

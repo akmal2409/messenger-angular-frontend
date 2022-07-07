@@ -1,15 +1,29 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostBinding, Input, OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-message',
-  templateUrl: './message.component.html',
-  styleUrls: ['./message.component.scss']
+  template: `
+    <div class="message-content">
+      {{ message }}
+    </div>
+  `,
+  styleUrls: ['./message.component.scss'],
 })
 export class MessageComponent implements OnInit {
+  @Input() message!: string;
+  @Input() isInverted!: boolean;
+  @Input() authorName: string | undefined;
+  @Input() authorThumbnailUrl: string | undefined;
+  @Input() isRead: boolean | undefined;
+  @Input() timestamp!: Date;
+  @HostBinding('id') @Input() id!: string;
 
-  constructor() { }
+  constructor() {}
 
-  ngOnInit(): void {
+  ngOnInit(): void {}
+
+  @HostBinding('class')
+  get _hostClass() {
+    return this.isInverted ? 'message-host-alternate' : 'message-host-default';
   }
-
 }

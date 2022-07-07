@@ -1,4 +1,4 @@
-import { MessageEvent } from "../websocket/message-event.model";
+import { MessageEvent } from '../websocket/message-event.model';
 
 export class Message {
   constructor(
@@ -9,8 +9,9 @@ export class Message {
     public body: string,
     public read: boolean,
     public edited: boolean,
-    public systemMessage: boolean
-  ) { }
+    public systemMessage: boolean,
+    public timestamp: Date
+  ) {}
 
   public static fromMessageEvent(event: MessageEvent) {
     return new Message(
@@ -21,7 +22,8 @@ export class Message {
       event.body,
       event.read,
       event.edited,
-      event.systemMessage
+      event.systemMessage,
+      event.timestamp
     );
   }
 }

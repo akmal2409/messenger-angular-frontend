@@ -1,6 +1,14 @@
-import { NgModule } from "@angular/core";
-import { TuiAlertModule, TuiButtonModule, TuiDialogModule, TuiHintModule, TuiRootModule, TuiScrollbarModule } from "@taiga-ui/core";
-import { TuiBadgedContentModule, TuiBadgeModule } from "@taiga-ui/kit";
+import { NgModule } from '@angular/core';
+import {
+  TuiAlertModule,
+  TuiButtonModule,
+  TuiDialogModule,
+  TuiHintModule,
+  TuiLoaderModule,
+  TuiRootModule,
+  TuiScrollbarModule,
+} from '@taiga-ui/core';
+import { TuiBadgedContentModule, TuiBadgeModule } from '@taiga-ui/kit';
 
 const MODULES = [
   TuiDialogModule,
@@ -11,13 +19,12 @@ const MODULES = [
   TuiScrollbarModule,
   TuiBadgedContentModule,
   TuiHintModule,
-  TuiAlertModule
+  TuiAlertModule,
+  TuiLoaderModule,
 ];
 
 @NgModule({
   imports: MODULES,
-  exports: MODULES
+  exports: MODULES,
 })
-export class TuiModule {
-
-}
+export class TuiModule {}

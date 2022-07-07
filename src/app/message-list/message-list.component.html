@@ -1,4 +1,0 @@
-<ul>
-  <li *ngFor="let message of messages">
-    {{ message.authorId === currentUserId ? 'You' : memberMap.get(message.authorId)?.name}}: {{message.body}}</li>
-</ul>

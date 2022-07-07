@@ -1,11 +1,16 @@
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { OktaAuthModule, OKTA_CONFIG } from '@okta/okta-angular';
 import { OktaAuth, OktaAuthOptions } from '@okta/okta-auth-js';
-import { TuiAlertModule, TuiDialogModule, TuiRootModule, TUI_SANITIZER } from "@taiga-ui/core";
-import { NgDompurifySanitizer } from "@tinkoff/ng-dompurify";
+import {
+  TuiAlertModule,
+  TuiDialogModule,
+  TuiRootModule,
+  TUI_SANITIZER,
+} from '@taiga-ui/core';
+import { NgDompurifySanitizer } from '@tinkoff/ng-dompurify';
 import { environment } from 'src/environments/environment';
 
 import { AppRoutingModule } from './app-routing.module';
@@ -22,6 +27,8 @@ import { ThreadComponent } from './thread/thread.component';
 import { MessageListComponent } from './message-list/message-list.component';
 import { MessageComponent } from './message-list/message/message.component';
 import { MessageInputComponent } from './message-input/message-input.component';
+import { ThreadHeaderComponent } from './thread/thread-header/thread-header.component';
+import { ThumbnailWithPresence } from './ui/user-thumbnail/thumbnail-with-presence.component';
 
 const oktaConfig: OktaAuthOptions = {
   issuer: environment.issuer,
@@ -42,9 +49,11 @@ const oktaAuth = new OktaAuth(oktaConfig);
     UserThumbnailComponent,
 
     ThreadComponent,
-     MessageListComponent,
-     MessageComponent,
-     MessageInputComponent
+    MessageListComponent,
+    MessageComponent,
+    MessageInputComponent,
+    ThreadHeaderComponent,
+    ThumbnailWithPresence,
   ],
   imports: [
     BrowserModule,
@@ -58,8 +67,8 @@ const oktaAuth = new OktaAuth(oktaConfig);
     { provide: OKTA_CONFIG, useValue: { oktaAuth } },
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
     { provide: TUI_SANITIZER, useClass: NgDompurifySanitizer },
-    RedirectAuthenticatedUsersGuard
+    RedirectAuthenticatedUsersGuard,
   ],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}

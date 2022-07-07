@@ -33,7 +33,14 @@ import { ThreadEventType, ThreadService } from '../service/thread.service';
   selector: 'app-thread',
   template: `
     <div class="thread-header-container">
-      <tui-loader [showLoader]="loading"></tui-loader>
+      <app-thread-header
+        [currentUserUid]="currentUser.uid"
+        [groupThread]="thread.groupThread"
+        [members]="thread.members"
+        [threadName]="thread.threadName"
+        [threadThumbnailUrl]="thread.threadPictureThumbnailUrl"
+      ></app-thread-header>
+      <!-- <tui-loader [showLoader]="loading"></tui-loader> -->
     </div>
     <div class="message-list-container">
       <div class="message-list-scrollbar" #scrollRef>
@@ -73,7 +80,7 @@ export class ThreadComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private _pagingState: string | undefined;
   private _threadId!: string;
-  private thread!: Thread;
+  thread!: Thread;
 
   ngOnInit(): void {
     this.route.paramMap

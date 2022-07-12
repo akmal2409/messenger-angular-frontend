@@ -1,4 +1,3 @@
-import { formatDate } from '@angular/common';
 import {
   AfterViewInit,
   Component,
@@ -19,6 +18,7 @@ import {
   take,
   takeUntil,
 } from 'rxjs';
+import { MessageSendRequest } from '../model/message/message-send-request.model';
 import { Message } from '../model/message/message.model';
 import { Thread } from '../model/thread/thread.model';
 import { UserDetails } from '../model/user/user-details.model';
@@ -28,12 +28,15 @@ import { AuthService } from '../service/auth.service';
 import { MessageService } from '../service/message.service';
 import { RxStompService } from '../service/rx-stomp.service';
 import { ThreadEventType, ThreadService } from '../service/thread.service';
+import { v4 as uuid } from 'uuid';
+import { MessageAcknowledgement } from '../model/message/message-acknowledgement.model';
 
 @Component({
   selector: 'app-thread',
   template: `
     <div class="thread-header-container">
       <app-thread-header
+        *ngIf="thread"
         [currentUserUid]="currentUser.uid"
         [groupThread]="thread.groupThread"
         [members]="thread.members"
@@ -48,13 +51,14 @@ import { ThreadEventType, ThreadService } from '../service/thread.service';
           [hasMore]="hasMore"
           [loading]="loading"
           [messages]="messages"
+          [pendingMessages]="pendingMessages"
           [memberMap]="memberMap"
           [currentUserId]="currentUser?.uid"
         ></app-message-list>
       </div>
     </div>
     <div class="message-input-container">
-      <app-message-input></app-message-input>
+      <app-message-input (onSend)="onSendMessage($event)"></app-message-input>
     </div>
   `,
   styleUrls: ['./thread.component.scss'],
@@ -72,6 +76,7 @@ export class ThreadComponent implements OnInit, AfterViewInit, OnDestroy {
   ) {}
 
   messages: Array<Message> = [];
+  pendingMessages: Array<MessageSendRequest> = [];
   currentUser!: User;
   loading = true;
   memberMap = new Map<string, UserDetails>();
@@ -117,6 +122,7 @@ export class ThreadComponent implements OnInit, AfterViewInit, OnDestroy {
           this.thread = thread;
           this.setupMemberMap();
           this.setupMessageListener();
+          this.setupAckChannelListener();
 
           if (this.messages.length > 0) {
             // when reading messages we asynchronously update on the backend the status,
@@ -185,6 +191,47 @@ export class ThreadComponent implements OnInit, AfterViewInit, OnDestroy {
           }
         });
     }
+  }
+
+  onSendMessage(message: string) {
+    const receiptId = uuid();
+
+    const messageSendRequest = new MessageSendRequest(
+      message,
+      this._threadId,
+      receiptId
+    );
+    this.pendingMessages.push(messageSendRequest);
+    this.rxStompService.publish({
+      destination: `/ws-api/users/${this.currentUser.uid}/threads/${this._threadId}/messages`,
+      body: JSON.stringify(messageSendRequest),
+    });
+  }
+
+  private setupAckChannelListener() {
+    this.rxStompService
+      .watch(`/user/queue/threads/${this._threadId}/acks`)
+      .pipe(takeUntil(this._destroy$))
+      .subscribe((message) => {
+        const acknowledgement = JSON.parse(
+          message.body
+        ) as MessageAcknowledgement;
+
+        const pendingMessageIndex = this.pendingMessages.findIndex(
+          (m) => m.receiptId === acknowledgement.receiptId
+        );
+        if (pendingMessageIndex !== -1) {
+          this.pendingMessages.splice(pendingMessageIndex, 1);
+        }
+        console.log(this.thread.threadName);
+
+        this.messages.push(acknowledgement.message);
+        this.threadService.publish({
+          type: ThreadEventType.ACK,
+          threadId: this._threadId,
+          payload: acknowledgement.message,
+        });
+      });
   }
 
   /**

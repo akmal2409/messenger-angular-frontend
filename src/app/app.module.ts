@@ -29,6 +29,10 @@ import { MessageComponent } from './message-list/message/message.component';
 import { MessageInputComponent } from './message-input/message-input.component';
 import { ThreadHeaderComponent } from './thread/thread-header/thread-header.component';
 import { ThumbnailWithPresence } from './ui/user-thumbnail/thumbnail-with-presence.component';
+import { PopoverDirective } from './directive/emoji-popover.directive';
+import { PoopOverContent } from './directive/popover-content.component';
+import { PickerModule } from '@ctrl/ngx-emoji-mart';
+import { ReactiveFormsModule } from '@angular/forms';
 
 const oktaConfig: OktaAuthOptions = {
   issuer: environment.issuer,
@@ -54,6 +58,8 @@ const oktaAuth = new OktaAuth(oktaConfig);
     MessageInputComponent,
     ThreadHeaderComponent,
     ThumbnailWithPresence,
+    PopoverDirective,
+    PoopOverContent,
   ],
   imports: [
     BrowserModule,
@@ -62,6 +68,8 @@ const oktaAuth = new OktaAuth(oktaConfig);
     AppRoutingModule,
     TuiModule,
     BrowserAnimationsModule,
+    PickerModule,
+    ReactiveFormsModule,
   ],
   providers: [
     { provide: OKTA_CONFIG, useValue: { oktaAuth } },

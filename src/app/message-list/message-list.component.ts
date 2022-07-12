@@ -1,5 +1,6 @@
 import { formatDate } from '@angular/common';
 import { Component, Input, OnInit } from '@angular/core';
+import { MessageSendRequest } from '../model/message/message-send-request.model';
 import { Message } from '../model/message/message.model';
 import { UserDetails } from '../model/user/user-details.model';
 
@@ -22,20 +23,31 @@ import { UserDetails } from '../model/user/user-details.model';
             [authorThumbnailUrl]="
               memberMap.get(message.authorId)?.profileThumbnailImageUrl
             "
-            [timestamp]="message.timestamp"
             [isInverted]="currentUserId !== message.authorId"
             [isRead]="message.read"
             [id]="'messsage-' + message.messageId"
           ></app-message>
         </li>
-        <!-- {{ getFormattedTimestamp(message.timestamp) }} -->
       </ng-container>
+      <li class="default" *ngFor="let message of pendingMessages">
+        <app-message
+          [message]="message.body"
+          [isInverted]="false"
+          [isRead]="false"
+          [id]="'messsage-' + message.receiptId"
+        ></app-message>
+        <div class="message-spinner-container">
+          <div class="spinner"></div>
+        </div>
+      </li>
     </ul>
   `,
   styleUrls: ['./message-list.component.scss'],
 })
 export class MessageListComponent implements OnInit {
   @Input() messages: Array<Message> = [];
+  @Input() pendingMessages: Array<MessageSendRequest> = [];
+
   @Input() loading: boolean = false;
   @Input() memberMap = new Map<string, UserDetails>();
   @Input() currentUserId?: string;

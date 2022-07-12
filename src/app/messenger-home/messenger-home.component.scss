@@ -12,6 +12,8 @@
   grid-area: side-content;
   height: 100%;
   overflow: hidden;
+  border-right: 1px solid #ccc;
+  padding-right: 9px;
 }
 
 .main-content {
@@ -25,7 +27,6 @@
   display: flex;
   align-items: center;
   box-sizing: border-box;
-
 
   .thread-list-heading {
     flex: 1 0.5 150px;
@@ -43,7 +44,6 @@
     }
   }
 }
-
 
 .thread-scrollbar {
   max-width: 99%;

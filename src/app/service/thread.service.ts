@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { filter, Observable, Subject } from 'rxjs';
 import { environment } from 'src/environments/environment';
+import { Message } from '../model/message/message.model';
 import { LatestThread } from '../model/thread/latest-thread.model';
 import { Thread } from '../model/thread/thread.model';
 import { MessageEvent } from '../model/websocket/message-event.model';
@@ -42,10 +43,11 @@ export class ThreadService {
 export interface ThreadEvent {
   type: ThreadEventType;
   threadId: string;
-  payload: MessageEvent | boolean;
+  payload: MessageEvent | boolean | Message;
 }
 
 export enum ThreadEventType {
   READ_STATUS,
   NEW_MESSAGE,
+  ACK,
 }

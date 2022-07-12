@@ -1,0 +1,24 @@
+:host {
+  padding-top: 20px;
+  padding-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.input-container {
+  flex-grow: 1;
+  position: relative;
+}
+
+.emoji-button {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  cursor: pointer;
+}
+
+.textarea {
+  max-height: 140px;
+}

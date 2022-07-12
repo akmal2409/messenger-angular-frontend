@@ -8,7 +8,11 @@ import {
   TuiRootModule,
   TuiScrollbarModule,
 } from '@taiga-ui/core';
-import { TuiBadgedContentModule, TuiBadgeModule } from '@taiga-ui/kit';
+import {
+  TuiBadgedContentModule,
+  TuiBadgeModule,
+  TuiTextAreaModule,
+} from '@taiga-ui/kit';
 
 const MODULES = [
   TuiDialogModule,
@@ -21,6 +25,7 @@ const MODULES = [
   TuiHintModule,
   TuiAlertModule,
   TuiLoaderModule,
+  TuiTextAreaModule,
 ];
 
 @NgModule({

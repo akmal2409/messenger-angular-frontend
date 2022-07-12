@@ -1,5 +1,5 @@
-import { RxStompConfig } from "@stomp/rx-stomp";
-import { environment } from "src/environments/environment";
+import { RxStompConfig } from '@stomp/rx-stomp';
+import { environment } from 'src/environments/environment';
 
 export const rxStompConfig: RxStompConfig = {
   brokerURL: environment.wsEndpoint,
@@ -8,6 +8,5 @@ export const rxStompConfig: RxStompConfig = {
   reconnectDelay: 200,
   // debug: (msg: string): void => {
   //   console.log(new Date(), msg);
-  // }
-}
-
+  // },
+};

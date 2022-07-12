@@ -7,6 +7,7 @@ import { AuthService } from '../service/auth.service';
 import { RxStompService } from '../service/rx-stomp.service';
 import { ThreadEventType, ThreadService } from '../service/thread.service';
 import { Message } from '@stomp/stompjs';
+import { Message as MessageModel } from 'src/app/model/message/message.model';
 import { TuiAlertService } from '@taiga-ui/core';
 import { MessageEvent } from '../model/websocket/message-event.model';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -106,9 +107,26 @@ export class MessengerHomeComponent implements OnInit, OnDestroy {
               thread.author.uid = messageEvent.authorId;
               thread.read = messageEvent.read;
               thread.lastMessageId = messageEvent.messageId;
-              thread.lastMessageId = messageEvent.messageId;
               thread.threadName = messageEvent.threadName;
               thread.lastMessageAt = 'Now';
+              this.latestThreads.sort(
+                (t1, t2) => t2.lastMessageId - t1.lastMessageId
+              );
+              break;
+            case ThreadEventType.ACK:
+              const message = event.payload as MessageModel;
+              thread.lastMessageId = message.messageId;
+              thread.lastMessageAt = 'Now';
+              thread.author.uid = message.authorId;
+              thread.author.name = `${this.user.firstName} ${this.user.lastName}`;
+              thread.author.profileImageUrl = this.user.profileImageUrl;
+              thread.author.profileThumbnailImageUrl =
+                this.user.profileThumbnailUrl;
+              thread.lastMessage = message.body;
+              this.latestThreads.sort(
+                (t1, t2) => t2.lastMessageId - t1.lastMessageId
+              );
+              break;
           }
         }
       });

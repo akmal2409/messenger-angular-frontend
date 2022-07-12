@@ -15,7 +15,6 @@ export class MessageComponent implements OnInit {
   @Input() authorName: string | undefined;
   @Input() authorThumbnailUrl: string | undefined;
   @Input() isRead: boolean | undefined;
-  @Input() timestamp!: Date;
   @HostBinding('id') @Input() id!: string;
 
   constructor() {}

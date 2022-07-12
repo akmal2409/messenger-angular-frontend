@@ -26,3 +26,30 @@
   width: 100%;
   text-align: center;
 }
+
+.message-spinner-container {
+  position: relative;
+  margin-left: 15px;
+}
+
+@keyframes spinner {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spinner:before {
+  content: "";
+  box-sizing: border-box;
+  position: absolute;
+  top: 80%;
+  left: 70%;
+  width: 15px;
+  height: 15px;
+  margin-top: -10px;
+  margin-left: -10px;
+  border-radius: 50%;
+  border: 2px solid #ccc;
+  border-top-color: #000;
+  animation: spinner 0.6s linear infinite;
+}

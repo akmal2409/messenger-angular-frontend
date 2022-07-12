@@ -11,6 +11,7 @@
     min-width: 70px;
     min-height: 35px;
     display: flex;
+    align-items: center;
   }
 
   li.default {
@@ -52,4 +53,10 @@
   border: 2px solid #ccc;
   border-top-color: #000;
   animation: spinner 0.6s linear infinite;
+}
+
+.thumbnail-wrapper {
+  height: 30px;
+  width: 30px;
+  margin-right: 6px;
 }

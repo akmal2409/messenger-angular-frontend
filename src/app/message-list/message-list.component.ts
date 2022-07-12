@@ -17,6 +17,15 @@ import { UserDetails } from '../model/user/user-details.model';
             currentUserId !== message.authorId ? 'alternate' : 'default'
           "
         >
+          <div
+            class="thumbnail-wrapper"
+            *ngIf="currentUserId !== message.authorId"
+          >
+            <app-user-thumbnail
+              *ngIf="showMessageThumbnail(message, i)"
+              [src]="memberMap.get(message.authorId)?.profileThumbnailImageUrl"
+            ></app-user-thumbnail>
+          </div>
           <app-message
             [message]="message.body"
             [authorName]="memberMap.get(message.authorId)?.name"
@@ -76,5 +85,21 @@ export class MessageListComponent implements OnInit {
     }
 
     return false;
+  }
+
+  public showMessageThumbnail(message: Message, index: number) {
+    const notFromCurrentUser = message.authorId !== this.currentUserId;
+
+    if (notFromCurrentUser && index === this.messages.length - 1) return true;
+    else if (notFromCurrentUser && index < this.messages.length - 1) {
+      const nextMessage = this.messages[index + 1];
+
+      return (
+        nextMessage.authorId !== message.authorId ||
+        this.showTimestamp(index + 1)
+      );
+    } else {
+      return false;
+    }
   }
 }

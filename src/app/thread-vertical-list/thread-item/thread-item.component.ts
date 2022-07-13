@@ -21,9 +21,12 @@ import {
 
     <div class="message-info" [class.unread]="!read">
       <p class="name" style="font-size: 0.85rem;">{{ name }}</p>
-      <p class="message">
+      <p class="message" *ngIf="!showTyping">
         {{ currentUserId == authorId ? 'You: ' : null }}{{ lastMessage }}
       </p>
+      <span *ngIf="showTyping" style="margin-top: 3.5px; margin-left: 2px;"
+        ><three-bouncy-dots size="s"></three-bouncy-dots
+      ></span>
     </div>
 
     <div class="message-status">
@@ -135,6 +138,7 @@ export class ThreadItemComponent implements OnInit {
   @Input() authorId: string | undefined;
   @Input() authorName: string | undefined;
   @Input() online!: boolean;
+  @Input() showTyping?: boolean;
 
   constructor() {}
 

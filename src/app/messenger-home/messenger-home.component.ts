@@ -11,6 +11,7 @@ import { Message as MessageModel } from 'src/app/model/message/message.model';
 import { TuiAlertService } from '@taiga-ui/core';
 import { MessageEvent } from '../model/websocket/message-event.model';
 import { ActivatedRoute, Router } from '@angular/router';
+import { TypingEvent } from '../model/message/typing-event.model';
 
 @Component({
   selector: 'app-messenger-home',
@@ -28,6 +29,9 @@ export class MessengerHomeComponent implements OnInit, OnDestroy {
   latestThreads: Array<LatestThread> = [];
   loading = false;
   user!: User;
+
+  showTypingThreadIdMap = new Map<string, boolean>();
+  showTypingTimeoutId?: any;
 
   private readonly _destroy$ = new Subject<null>();
 
@@ -57,6 +61,7 @@ export class MessengerHomeComponent implements OnInit, OnDestroy {
 
         this.initNotificationsListener();
         this.initThreadEventListener();
+        this.initTypingEventListener();
       });
   }
 
@@ -84,6 +89,26 @@ export class MessengerHomeComponent implements OnInit, OnDestroy {
           const messageEvent: MessageEvent = JSON.parse(message.body);
           this.handleMessageEvent(messageEvent);
         }
+      });
+  }
+
+  private initTypingEventListener() {
+    this.rxStompService
+      .watch('/user/queue/typing')
+      .pipe(takeUntil(this._destroy$))
+      .subscribe((message) => {
+        const typingEvent = JSON.parse(message.body) as TypingEvent;
+
+        if (this.showTypingTimeoutId) {
+          clearTimeout(this.showTypingTimeoutId);
+        }
+
+        this.showTypingThreadIdMap.set(typingEvent.threadId, true);
+
+        this.showTypingTimeoutId = setTimeout(
+          () => this.showTypingThreadIdMap.delete(typingEvent.threadId),
+          2500
+        );
       });
   }
 

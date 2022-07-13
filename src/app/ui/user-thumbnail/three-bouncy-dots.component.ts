@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, HostBinding, Input } from '@angular/core';
 
 @Component({
   selector: 'three-bouncy-dots',
@@ -12,10 +12,23 @@ import { Component } from '@angular/core';
       :host {
         display: flex;
         gap: 4px;
+
+        &.s .dot {
+          width: 8px;
+          height: 8px;
+        }
+
+        &.m .dot {
+          width: 10px;
+          height: 10px;
+        }
+
+        &.l .dot {
+          width: 15px;
+          height: 15px;
+        }
       }
       .dot {
-        width: 10px;
-        height: 10px;
         border-radius: 50%;
         background-color: #ccc;
         animation: 1s linear infinite bounce;
@@ -35,11 +48,11 @@ import { Component } from '@angular/core';
         }
 
         25% {
-          transform: translateY(-10px);
+          transform: translateY(-6px);
         }
 
         50% {
-          transform: translateY(-10px);
+          transform: translateY(-6px);
         }
 
         100% {
@@ -49,4 +62,18 @@ import { Component } from '@angular/core';
     `,
   ],
 })
-export class ThreeBouncyDotsComponent {}
+export class ThreeBouncyDotsComponent {
+  @Input() size?: 's' | 'm' | 'l' = 'm';
+
+  @HostBinding('class') get hostClass() {
+    if (this.size === 's') {
+      return 's';
+    } else if (this.size === 'm') {
+      return 'm';
+    } else if (this.size === 'l') {
+      return 'l';
+    } else {
+      return 'm';
+    }
+  }
+}

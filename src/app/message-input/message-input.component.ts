@@ -14,8 +14,9 @@ import { FormControl } from '@angular/forms';
 })
 export class MessageInputComponent implements OnInit {
   @Output() onSend = new EventEmitter<string>();
-
   control = new FormControl<string>('');
+
+  @Output() onChange = this.control.valueChanges;
 
   constructor() {}
 

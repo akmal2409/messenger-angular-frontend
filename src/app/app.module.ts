@@ -33,6 +33,7 @@ import { PopoverDirective } from './directive/emoji-popover.directive';
 import { PoopOverContent } from './directive/popover-content.component';
 import { PickerModule } from '@ctrl/ngx-emoji-mart';
 import { ReactiveFormsModule } from '@angular/forms';
+import { ThreeBouncyDotsComponent } from './ui/user-thumbnail/three-bouncy-dots.component';
 
 const oktaConfig: OktaAuthOptions = {
   issuer: environment.issuer,
@@ -60,6 +61,7 @@ const oktaAuth = new OktaAuth(oktaConfig);
     ThumbnailWithPresence,
     PopoverDirective,
     PoopOverContent,
+    ThreeBouncyDotsComponent,
   ],
   imports: [
     BrowserModule,

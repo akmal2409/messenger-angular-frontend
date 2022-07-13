@@ -30,6 +30,7 @@ import { RxStompService } from '../service/rx-stomp.service';
 import { ThreadEventType, ThreadService } from '../service/thread.service';
 import { v4 as uuid } from 'uuid';
 import { MessageAcknowledgement } from '../model/message/message-acknowledgement.model';
+import { TypingEvent } from '../model/message/typing-event.model';
 
 @Component({
   selector: 'app-thread',
@@ -50,6 +51,7 @@ import { MessageAcknowledgement } from '../model/message/message-acknowledgement
           [hasMore]="hasMore"
           [loading]="loading"
           [messages]="messages"
+          [showTyping]="showTyping"
           [pendingMessages]="pendingMessages"
           [memberMap]="memberMap"
           [currentUserId]="currentUser?.uid"
@@ -58,7 +60,10 @@ import { MessageAcknowledgement } from '../model/message/message-acknowledgement
       </div>
     </div>
     <div class="message-input-container">
-      <app-message-input (onSend)="onSendMessage($event)"></app-message-input>
+      <app-message-input
+        (onChange)="onMessageInput($event)"
+        (onSend)="onSendMessage($event)"
+      ></app-message-input>
     </div>
   `,
   styleUrls: ['./thread.component.scss'],
@@ -81,7 +86,16 @@ export class ThreadComponent implements OnInit, AfterViewInit, OnDestroy {
   loading = true;
   memberMap = new Map<string, UserDetails>();
 
+  showTyping = false;
+
+  typingTimeoutId: any;
+
   private readonly _destroy$ = new Subject<undefined>();
+  private readonly onType = new Subject<string | null>();
+
+  private readonly typing$ = this.onType
+    .asObservable()
+    .pipe(debounceTime(250), takeUntil(this._destroy$));
 
   private _pagingState: string | undefined;
   private _threadId!: string;
@@ -123,6 +137,7 @@ export class ThreadComponent implements OnInit, AfterViewInit, OnDestroy {
           this.setupMemberMap();
           this.setupMessageListener();
           this.setupAckChannelListener();
+          this.setupTypingListener();
 
           if (this.messages.length > 0) {
             // when reading messages we asynchronously update on the backend the status,
@@ -143,6 +158,10 @@ export class ThreadComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     this.setUpLazyLoadingScrollListener();
+  }
+
+  onMessageInput(body: string | null) {
+    this.onType.next(body);
   }
 
   /**
@@ -223,7 +242,6 @@ export class ThreadComponent implements OnInit, AfterViewInit, OnDestroy {
         if (pendingMessageIndex !== -1) {
           this.pendingMessages.splice(pendingMessageIndex, 1);
         }
-        console.log(this.thread.threadName);
 
         this.messages.push(acknowledgement.message);
         this.threadService.publish({
@@ -231,6 +249,34 @@ export class ThreadComponent implements OnInit, AfterViewInit, OnDestroy {
           threadId: this._threadId,
           payload: acknowledgement.message,
         });
+      });
+  }
+
+  private setupTypingListener() {
+    this.typing$.subscribe({
+      next: (body) => {
+        console.log(
+          'Publishing to',
+          `/ws-api/users/${this.currentUser.uid}/threads/${this._threadId}/typing`
+        );
+
+        this.rxStompService.publish({
+          destination: `/ws-api/users/${this.currentUser.uid}/threads/${this._threadId}/typing`,
+        });
+      },
+    });
+
+    this.rxStompService
+      .watch(`/user/queue/typing`)
+      .pipe(takeUntil(this._destroy$))
+      .subscribe((message) => {
+        if (this.typingTimeoutId) {
+          clearTimeout(this.typingTimeoutId);
+        }
+        this.showTyping = true;
+        this.typingTimeoutId = setTimeout(() => {
+          this.showTyping = false;
+        }, 3000);
       });
   }
 

@@ -21,6 +21,10 @@
   li.alternate {
     justify-content: flex-start;
   }
+
+  li.alternate.elevated {
+    animation: elevate ease-in 350ms;
+  }
 }
 
 .message-date-separator {
@@ -31,6 +35,15 @@
 .message-spinner-container {
   position: relative;
   margin-left: 15px;
+}
+
+@keyframes elevate {
+  from {
+    transform: translateY(30px);
+  }
+  to {
+    transform: translateY(0);
+  }
 }
 
 @keyframes spinner {

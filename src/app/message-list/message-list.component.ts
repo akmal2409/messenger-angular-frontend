@@ -49,6 +49,10 @@ import { UserDetails } from '../model/user/user-details.model';
           <div class="spinner"></div>
         </div>
       </li>
+
+      <li *ngIf="showTyping" class="alternate elevated">
+        <three-bouncy-dots></three-bouncy-dots>
+      </li>
     </ul>
   `,
   styleUrls: ['./message-list.component.scss'],
@@ -58,6 +62,7 @@ export class MessageListComponent implements OnInit {
   @Input() pendingMessages: Array<MessageSendRequest> = [];
 
   @Input() loading: boolean = false;
+  @Input() showTyping?: boolean;
   @Input() memberMap = new Map<string, UserDetails>();
   @Input() currentUserId?: string;
   @Input() hasMore?: boolean;

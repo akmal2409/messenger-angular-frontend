@@ -43,7 +43,6 @@ import { MessageAcknowledgement } from '../model/message/message-acknowledgement
         [threadName]="thread.threadName"
         [threadThumbnailUrl]="thread.threadPictureThumbnailUrl"
       ></app-thread-header>
-      <!-- <tui-loader [showLoader]="loading"></tui-loader> -->
     </div>
     <div class="message-list-container">
       <div class="message-list-scrollbar" #scrollRef>
@@ -55,6 +54,7 @@ import { MessageAcknowledgement } from '../model/message/message-acknowledgement
           [memberMap]="memberMap"
           [currentUserId]="currentUser?.uid"
         ></app-message-list>
+        <tui-loader [showLoader]="loading"></tui-loader>
       </div>
     </div>
     <div class="message-input-container">

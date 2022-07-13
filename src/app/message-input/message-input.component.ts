@@ -26,7 +26,12 @@ export class MessageInputComponent implements OnInit {
   }
 
   @HostListener('document:keydown.enter', ['$event'])
-  keypressListener() {
+  keypressListener(event: KeyboardEvent) {
+    event.preventDefault();
+    this.sendMessage();
+  }
+
+  sendMessage() {
     if (this.control.value && this.control.value?.trim()?.length > 0) {
       this.onSend.emit(this.control.value);
       this.control.setValue('');

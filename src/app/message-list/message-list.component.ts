@@ -66,7 +66,20 @@ export class MessageListComponent implements OnInit {
 
   ngOnInit(): void {}
 
+  /**
+   * Returns formatted date in format 'MM dd,yyyy'.
+   * If the date is today, it returns 'Today'
+   *
+   * @param date
+   * @returns
+   */
   public getFormattedTimestamp(date: Date): string {
+    const today = new Date();
+    const parsedDate = new Date(date); // because under the hood the date from the backend is a string, bug in JS
+
+    if (parsedDate.setHours(0, 0, 0, 0) === today.setHours(0, 0, 0, 0))
+      return 'Today';
+
     return formatDate(date, 'mediumDate', 'en-GB');
   }
 

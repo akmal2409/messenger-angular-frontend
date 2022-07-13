@@ -11,6 +11,7 @@ import {
 import {
   TuiBadgedContentModule,
   TuiBadgeModule,
+  TuiInputModule,
   TuiTextAreaModule,
 } from '@taiga-ui/kit';
 
@@ -26,6 +27,7 @@ const MODULES = [
   TuiAlertModule,
   TuiLoaderModule,
   TuiTextAreaModule,
+  TuiInputModule,
 ];
 
 @NgModule({

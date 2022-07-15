@@ -8,6 +8,7 @@
       [lastMessage]="thread.lastMessage"
       [showTyping]="showTypingThreadIdMap.get(thread.threadId)"
       [read]="thread.read"
+      [online]="isOnline(threadLastSeenMap.get(thread.threadId))"
       [systemMessage]="thread.systemMessage"
       [currentUserId]="currenUserId"
       [authorId]="thread?.author?.uid || '' "

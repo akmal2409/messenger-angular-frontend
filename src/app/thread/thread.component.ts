@@ -18,6 +18,8 @@ import {
   take,
   takeUntil,
 } from 'rxjs';
+import { v4 as uuid } from 'uuid';
+import { MessageAcknowledgement } from '../model/message/message-acknowledgement.model';
 import { MessageSendRequest } from '../model/message/message-send-request.model';
 import { Message } from '../model/message/message.model';
 import { Thread } from '../model/thread/thread.model';
@@ -28,9 +30,11 @@ import { AuthService } from '../service/auth.service';
 import { MessageService } from '../service/message.service';
 import { RxStompService } from '../service/rx-stomp.service';
 import { ThreadEventType, ThreadService } from '../service/thread.service';
-import { v4 as uuid } from 'uuid';
-import { MessageAcknowledgement } from '../model/message/message-acknowledgement.model';
-import { TypingEvent } from '../model/message/typing-event.model';
+import { UserService } from '../service/user.service';
+
+export interface UserDetailsWithPresence extends UserDetails {
+  lastSeenAt?: Date;
+}
 
 @Component({
   selector: 'app-thread',
@@ -41,6 +45,7 @@ import { TypingEvent } from '../model/message/typing-event.model';
         [currentUserUid]="currentUser.uid"
         [groupThread]="thread.groupThread"
         [members]="thread.members"
+        [memberMap]="memberMap"
         [threadName]="thread.threadName"
         [threadThumbnailUrl]="thread.threadPictureThumbnailUrl"
       ></app-thread-header>
@@ -77,14 +82,15 @@ export class ThreadComponent implements OnInit, AfterViewInit, OnDestroy {
     private readonly authService: AuthService,
     private readonly threadService: ThreadService,
     private readonly route: ActivatedRoute,
-    private readonly rxStompService: RxStompService
+    private readonly rxStompService: RxStompService,
+    private readonly userService: UserService
   ) {}
 
   messages: Array<Message> = [];
   pendingMessages: Array<MessageSendRequest> = [];
   currentUser!: User;
   loading = true;
-  memberMap = new Map<string, UserDetails>();
+  memberMap = new Map<string, UserDetailsWithPresence>();
 
   showTyping = false;
 
@@ -138,6 +144,8 @@ export class ThreadComponent implements OnInit, AfterViewInit, OnDestroy {
           this.setupMessageListener();
           this.setupAckChannelListener();
           this.setupTypingListener();
+          this.fetchUserPresences();
+          this.setupUserPresenceEventListener();
 
           if (this.messages.length > 0) {
             // when reading messages we asynchronously update on the backend the status,
@@ -210,6 +218,43 @@ export class ThreadComponent implements OnInit, AfterViewInit, OnDestroy {
           }
         });
     }
+  }
+
+  private fetchUserPresences() {
+    const userIdsToFetchPresenceFor = this.thread.members
+      .filter((user) => user.uid !== this.currentUser.uid)
+      .map((u) => u.uid);
+
+    this.userService
+      .getPresenceByIds(userIdsToFetchPresenceFor)
+      .subscribe((userPresences) => {
+        for (const uid in userPresences) {
+          if (this.memberMap.has(uid)) {
+            this.memberMap.set(uid, {
+              ...this.memberMap.get(uid)!,
+              lastSeenAt: new Date(userPresences[uid]),
+            });
+          }
+        }
+      });
+  }
+
+  private setupUserPresenceEventListener() {
+    const userIdsToFetchPresenceFor = this.thread.members
+      .filter((user) => user.uid !== this.currentUser.uid)
+      .map((u) => u.uid);
+
+    this.userService
+      .presenceEventsForUids$(userIdsToFetchPresenceFor)
+      .pipe(takeUntil(this._destroy$))
+      .subscribe({
+        next: (presenceEvent) => {
+          this.memberMap.set(presenceEvent.uid, {
+            ...this.memberMap.get(presenceEvent.uid)!,
+            lastSeenAt: new Date(presenceEvent.lastSeenAt),
+          });
+        },
+      });
   }
 
   onSendMessage(message: string) {
@@ -314,6 +359,7 @@ export class ThreadComponent implements OnInit, AfterViewInit, OnDestroy {
       .watch(`/user/queue/threads/${this._threadId}`)
       .pipe(takeUntil(this._destroy$))
       .subscribe((message) => {
+        console.log('Message received at', new Date().getTime());
         this.handleMessageEvent(message);
       });
   }

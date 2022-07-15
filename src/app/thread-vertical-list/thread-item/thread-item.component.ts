@@ -143,7 +143,7 @@ export class ThreadItemComponent implements OnInit {
   constructor() {}
 
   ngOnInit(): void {
-    this.online = this.show();
+    // this.online = this.show();
   }
 
   show() {

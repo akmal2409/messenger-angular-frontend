@@ -1,5 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { UserDetails } from 'src/app/model/user/user-details.model';
+import { PresenceUtils } from 'src/app/shared/presence.utils';
+import { UserDetailsWithPresence } from '../thread.component';
 
 @Component({
   selector: 'app-thread-header',
@@ -8,7 +10,7 @@ import { UserDetails } from 'src/app/model/user/user-details.model';
       <app-thumbnail-presence
         [style]="{ height: '35px', width: '35px' }"
         [thumbnailUrl]="thumbnail"
-        [active]="true"
+        [active]="!groupThread && isOnline()"
       >
       </app-thumbnail-presence>
       <p class="thread-name">{{ name }}</p>
@@ -46,6 +48,7 @@ export class ThreadHeaderComponent implements OnInit {
   @Input() members!: Array<UserDetails>;
   @Input() threadThumbnailUrl?: string;
   @Input() currentUserUid!: string;
+  @Input() memberMap!: Map<string, UserDetailsWithPresence>;
 
   constructor() {}
 
@@ -57,7 +60,7 @@ export class ThreadHeaderComponent implements OnInit {
     }
 
     // means its a one on one chat, we have to get an inverse participant
-    return this.members.find((m) => m.uid !== this.currentUserUid)?.name;
+    return this.inverseParticipant?.name;
   }
 
   get thumbnail() {
@@ -66,7 +69,22 @@ export class ThreadHeaderComponent implements OnInit {
     }
 
     // means its a one on one chat, we have to get an inverse participant
-    return this.members.find((m) => m.uid !== this.currentUserUid)
-      ?.profileThumbnailImageUrl;
+    return this.inverseParticipant?.profileThumbnailImageUrl;
+  }
+
+  public isOnline() {
+    if (this.groupThread) {
+      return false;
+    }
+    return PresenceUtils.isOnline(
+      this.memberMap.get(this.inverseParticipant!.uid)?.lastSeenAt
+    );
+  }
+
+  /**
+   * For 1-1 chats returns the other side of the conversation (relative to the user)
+   */
+  get inverseParticipant() {
+    return this.members.find((m) => m.uid !== this.currentUserUid);
   }
 }

@@ -5,8 +5,7 @@ export class User {
     public lastName: string,
     public email: string,
     public profileThumbnailUrl: string,
-    public profileImageUrl: string
-  ) {
-
-  }
+    public profileImageUrl: string,
+    public lastSeenAt: Date
+  ) {}
 }

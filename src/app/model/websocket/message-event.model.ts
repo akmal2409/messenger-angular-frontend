@@ -3,6 +3,8 @@ export class MessageEvent {
     public messageId: number,
     public threadId: string,
     public threadName: string,
+    public threadPictureUrl: string,
+    public threadPictureThumbnailUrl: string,
     public bucket: number,
     public authorId: string,
     public authorName: string,

@@ -1,5 +1,5 @@
 import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
-import { Subject, switchMap, take, takeUntil } from 'rxjs';
+import { interval, Subject, switchMap, take, takeUntil } from 'rxjs';
 import { rxStompServiceFactory } from '../factory/rx-stomp-service.factory';
 import { LatestThread } from '../model/thread/latest-thread.model';
 import { User } from '../model/user/user.model';
@@ -12,6 +12,8 @@ import { TuiAlertService } from '@taiga-ui/core';
 import { MessageEvent } from '../model/websocket/message-event.model';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TypingEvent } from '../model/message/typing-event.model';
+import { UserPresenceEvent } from '../model/websocket/user-presence-event.model';
+import { UserService } from '../service/user.service';
 
 @Component({
   selector: 'app-messenger-home',
@@ -30,6 +32,9 @@ export class MessengerHomeComponent implements OnInit, OnDestroy {
   loading = false;
   user!: User;
 
+  threadLastSeenMap = new Map<string, Date>(); // applicable only to non group threads
+  uidToThreadMap = new Map<string, string>(); // applicable only to non group threads
+
   showTypingThreadIdMap = new Map<string, boolean>();
   showTypingTimeoutId?: any;
 
@@ -41,7 +46,8 @@ export class MessengerHomeComponent implements OnInit, OnDestroy {
     private readonly rxStompService: RxStompService,
     @Inject(TuiAlertService) private readonly alertService: TuiAlertService,
     private readonly router: Router,
-    private readonly route: ActivatedRoute
+    private readonly route: ActivatedRoute,
+    private readonly userService: UserService
   ) {}
 
   ngOnInit(): void {
@@ -59,9 +65,13 @@ export class MessengerHomeComponent implements OnInit, OnDestroy {
         this.latestThreads = threads;
         this.loading = false;
 
+        this.fetchUserPresence();
+
         this.initNotificationsListener();
         this.initThreadEventListener();
         this.initTypingEventListener();
+        this.initUserPresenceEventListener();
+        this.initHeartbeatPublisher();
       });
   }
 
@@ -80,6 +90,46 @@ export class MessengerHomeComponent implements OnInit, OnDestroy {
     this.rxStompService.deactivate();
   }
 
+  private fetchUserPresence() {
+    this.threadLastSeenMap = new Map<string, Date>();
+
+    this.uidToThreadMap = new Map<string, string>(
+      this.latestThreads
+        .filter((t) => !t.groupThread)
+        .map((t) => [
+          [...t.memberIds].find((id) => id !== this.user.uid)!,
+          t.threadId,
+        ])
+    );
+
+    this.userService
+      .getPresenceByIds([...this.uidToThreadMap.keys()])
+      .subscribe((userPresences) => {
+        for (const uid in userPresences) {
+          this.threadLastSeenMap.set(
+            this.uidToThreadMap.get(uid)!,
+            new Date(userPresences[uid])
+          );
+        }
+      });
+  }
+
+  /**
+   * Periodically (every 4 minutes) sends a heartbeat to the server that marks the presence of the user
+   * and notifies all of its contacts.
+   */
+  private initHeartbeatPublisher() {
+    interval(20000)
+      .pipe(takeUntil(this._destroy$))
+      .subscribe(() => {
+        console.log('Publishing heartbeat');
+
+        this.rxStompService.publish({
+          destination: `/ws-api/users/${this.user.uid}/heartbeat`,
+        });
+      });
+  }
+
   private initNotificationsListener() {
     this.rxStompService
       .watch('/user/queue/notifications')
@@ -88,6 +138,29 @@ export class MessengerHomeComponent implements OnInit, OnDestroy {
         if (message.body) {
           const messageEvent: MessageEvent = JSON.parse(message.body);
           this.handleMessageEvent(messageEvent);
+        }
+      });
+  }
+
+  private initUserPresenceEventListener() {
+    this.rxStompService
+      .watch('/user/queue/user-presence')
+      .pipe(takeUntil(this._destroy$))
+      .subscribe((message: Message) => {
+        const jsonPresenceEvent = JSON.parse(message.body) as RawPresenceEvent; // because JSON.parse cant handle serializing LocalDateTime
+        const userPresenceEvent = new UserPresenceEvent(
+          jsonPresenceEvent.uid,
+          new Date(jsonPresenceEvent.lastSeenAt)
+        );
+
+        this.userService.presenceEventStream.next(userPresenceEvent);
+        console.log('User presence', userPresenceEvent);
+
+        if (this.uidToThreadMap.has(userPresenceEvent.uid)) {
+          this.threadLastSeenMap.set(
+            this.uidToThreadMap.get(userPresenceEvent.uid)!,
+            userPresenceEvent.lastSeenAt
+          );
         }
       });
   }
@@ -133,6 +206,9 @@ export class MessengerHomeComponent implements OnInit, OnDestroy {
               thread.read = messageEvent.read;
               thread.lastMessageId = messageEvent.messageId;
               thread.threadName = messageEvent.threadName;
+              thread.threadPictureUrl = messageEvent.threadPictureUrl;
+              thread.threadPictureThumbnailUrl =
+                messageEvent.threadPictureThumbnailUrl;
               thread.lastMessageAt = 'Now';
               this.latestThreads.sort(
                 (t1, t2) => t2.lastMessageId - t1.lastMessageId
@@ -188,3 +264,8 @@ export class MessengerHomeComponent implements OnInit, OnDestroy {
     this._destroy$.complete();
   }
 }
+
+type RawPresenceEvent = {
+  uid: string;
+  lastSeenAt: string;
+};

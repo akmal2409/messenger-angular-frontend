@@ -2,7 +2,7 @@ import { formatDate } from '@angular/common';
 import { Component, Input, OnInit } from '@angular/core';
 import { MessageSendRequest } from '../model/message/message-send-request.model';
 import { Message } from '../model/message/message.model';
-import { UserDetails } from '../model/user/user-details.model';
+import { UserDetailsWithPresence } from '../thread/thread.component';
 
 @Component({
   selector: 'app-message-list',
@@ -63,7 +63,7 @@ export class MessageListComponent implements OnInit {
 
   @Input() loading: boolean = false;
   @Input() showTyping?: boolean;
-  @Input() memberMap = new Map<string, UserDetails>();
+  @Input() memberMap = new Map<string, UserDetailsWithPresence>();
   @Input() currentUserId?: string;
   @Input() hasMore?: boolean;
 

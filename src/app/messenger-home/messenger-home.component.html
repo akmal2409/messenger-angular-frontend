@@ -20,6 +20,7 @@
       <app-thread-vertical-list [currenUserId]="user.uid"
                                 [threads]="latestThreads"
                                 [showTypingThreadIdMap]="showTypingThreadIdMap"
+                                [threadLastSeenMap]="threadLastSeenMap"
                                 (onClick)="onSelectThread($event)"
                                 *ngIf="!loading"></app-thread-vertical-list>
     </tui-scrollbar>
